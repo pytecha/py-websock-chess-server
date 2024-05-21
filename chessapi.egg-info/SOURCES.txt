@@ -1,0 +1,10 @@
+chessapi.c
+libchess.c
+libchess.h
+pyproject.toml
+server.py
+setup.py
+chessapi.egg-info/PKG-INFO
+chessapi.egg-info/SOURCES.txt
+chessapi.egg-info/dependency_links.txt
+chessapi.egg-info/top_level.txt

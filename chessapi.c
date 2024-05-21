@@ -1,5 +1,5 @@
 #define Py_SSIZE_T_CLEAN
-#include <python3.11/Python.h>
+#include <Python.h>
 #include <sys/socket.h>
 #include "libchess.h"
 
@@ -19,7 +19,7 @@
 // !contextual (buff_in)
 #define SEND_DATA(fd, msg, len) { buff_in[0] = 0x81; buff_in[1] = len; memcpy(buff_in + 2, msg, len); send(fd, buff_in, len + 2, 0); }
 
-// !contextual(buff_in, clnts_set, host_fd)
+// !contextual(buff_in, clnts_set)
 #define BROADCAST(msg, len) \
     {\
         Py_BLOCK_THREADS\
@@ -30,9 +30,7 @@
             PyObject *item; int fd;\
             while ((item = PyIter_Next(iter)) != NULL) {\
                 fd = PyLong_AsLong(item);\
-                if (fd != host_fd) {\
-                    send(fd, buff_in, len + 2, 0);\
-                }\
+                send(fd, buff_in, len + 2, 0);\
                 Py_DECREF(item);\
             }\
             Py_DECREF(iter);\
@@ -98,11 +96,13 @@ PyObject* game_loop(PyObject *self, PyObject *args) {
             while (true) {
                 nbytes = recv(host_fd, buff_in, BUFF_SIZE, 0);
                 if (nbytes < 8  || (buff_in[0] & 0x0f) == 0x8 || nbytes > 14) {
-                    uint8_t msg[] = { '5', ';', '7', ';', host_fd_lb, host_fd_rb };
+                    /*uint8_t msg[] = { '5', ';', '7', ';', host_fd_lb, host_fd_rb };
                     BROADCAST(msg, 6)
-                    sleep(1);
+                    sleep(1);*/
+                    SEND_DATA(opnt_fd, "5;7", 3)
                     Py_BLOCK_THREADS
                     CLOSE_HOST
+                    
                 }
                 length = buff_in[1] & 0x7f;
                 PARSE_DATA
